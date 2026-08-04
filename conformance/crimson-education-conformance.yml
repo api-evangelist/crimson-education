@@ -1,0 +1,104 @@
+generated: '2026-08-04'
+method: derived
+source: '@crimson-education/sdk v0.3.38 + live probes of api.app.crimsoneducation.io'
+notes: >-
+  Crimson Education publishes no compliance programme, no trust centre and no
+  standards-conformance claims. Every entry below is derived from the SDK contract or
+  from an observed probe; absence is recorded as conforms:false with the reason. No
+  Compliance pointer is emitted because no certification or compliance page was found.
+standards:
+- id: oauth2
+  conforms: false
+  status: declared-not-deployed
+  evidence: >-
+    The SDK implements an OAuth 2.0 authorization-code + PKCE client (authorize,
+    handleOAuthCallback, refresh, logout) but its README states the backend
+    /oauth/authorize and /oauth/token endpoints are not deployed. Anonymous GET of
+    /.well-known/oauth-authorization-server on both API hosts returns 404.
+- id: rfc7636-pkce
+  conforms: false
+  status: client-implemented-only
+  evidence: 'package/dist/core/auth/pkce.js exists in the published SDK, but the server-side flow it targets is not live.'
+- id: rfc6750-bearer-token
+  conforms: true
+  evidence: 'Authorization: Bearer <token> is the documented primary auth mode; anonymous /graphql returns 401 "No authorization provided".'
+- id: oidc
+  conforms: false
+  evidence: '/.well-known/openid-configuration returns 404 on api.app.crimsoneducation.io and api.staging.app.crimsoneducation.io. Tokens are Auth0-issued JWTs but no OIDC discovery document is published by Crimson.'
+- id: rfc8414-oauth-authorization-server-metadata
+  conforms: false
+  evidence: 404 on both API hosts.
+- id: rfc9728-oauth-protected-resource-metadata
+  conforms: false
+  evidence: 404 on both API hosts.
+- id: openapi
+  conforms: false
+  evidence: >-
+    No OpenAPI or Swagger document at /openapi.json, /openapi.yaml, /swagger.json,
+    /v1/openapi.json, /api-docs, /docs or /redoc on either API host, on the docs/app
+    host, or in the public GitHub org.
+- id: graphql
+  conforms: partial
+  evidence: >-
+    A live GraphQL endpoint exists at /graphql on both API hosts but returns 401 "No
+    authorization provided" anonymously, so introspection and SDL capture are
+    auth-gated. @crimson-education/replit-sdk forwards GraphQL requests through an
+    /api/function proxy, confirming GraphQL is a first-class surface.
+- id: rfc9457-problem-details
+  conforms: false
+  evidence: 'Observed error bodies are text/plain ("Not Found", "No authorization provided"); the SDK does no structured error parsing.'
+- id: rfc9116-security-txt
+  conforms: false
+  evidence: /.well-known/security.txt returns 404 on both API hosts and is not published on any Crimson host.
+- id: rfc8594-sunset-header
+  conforms: false
+  evidence: No deprecation or sunset policy is published; no Sunset/Deprecation header usage is documented.
+- id: asyncapi
+  conforms: false
+  applicable: false
+  evidence: No webhook, event or streaming surface is documented anywhere in the SDK or on the public site.
+- id: a2a-agent-card
+  conforms: false
+  evidence: >-
+    /.well-known/agent-card.json and /.well-known/agent.json return 404 on both API
+    hosts. app.crimsoneducation.org answers 200 for both, but with the SPA HTML shell
+    (text/html), which is not an agent card.
+- id: mcp
+  conforms: false
+  evidence: No hosted or remote MCP server was found in the docs, the npm scope, the GitHub org or MCP registries.
+- id: rfc9116-pagination-conventions
+  conforms: partial
+  evidence: >-
+    Offset-limit pagination is implemented consistently within each surface but the
+    parameter names differ across surfaces (start/limit on /roadmap/*, limit/offset on
+    /api/v1/package-items), and two response envelopes coexist.
+- id: idempotency
+  conforms: false
+  evidence: No idempotency key header, parameter or retry contract is documented.
+- id: tls
+  conforms: true
+  evidence: 'TLSv1.3 on www.crimsoneducation.org and api.app.crimsoneducation.io (see security/crimson-education-domain-security.yml).'
+- id: dnssec
+  conforms: false
+  evidence: 'DNSSEC not enabled on crimsoneducation.org (probed).'
+- id: dmarc
+  conforms: partial
+  evidence: 'DMARC record present on crimsoneducation.org with p=none (monitor only, not enforcing).'
+compliance_program:
+  published: false
+  trust_center: false
+  certifications: []
+  probed:
+  - {host: trust.crimsoneducation.org, result: NXDOMAIN}
+  - {host: security.crimsoneducation.org, result: NXDOMAIN}
+  note: >-
+    probe-security-programs.py returned vdp=none trust=none. Crimson handles minors'
+    education data across many jurisdictions, so the absence of any published
+    compliance or trust posture is a notable gap rather than a non-applicable check.
+x-evidence:
+  fetched: '2026-08-04'
+  sources:
+  - https://api.app.crimsoneducation.io/graphql
+  - https://api.app.crimsoneducation.io/.well-known/openid-configuration
+  - https://api.staging.app.crimsoneducation.io/.well-known/oauth-authorization-server
+  - https://registry.npmjs.org/@crimson-education%2Fsdk

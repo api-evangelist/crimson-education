@@ -1,0 +1,52 @@
+generated: '2026-08-04'
+method: searched
+source: https://www.npmjs.com/package/@crimson-education/sdk
+notes: >-
+  Crimson Education publishes no sandbox programme, no test credentials, no magic
+  test identifiers and no self-service signup. What it does publish is a named
+  staging environment in the SDK README, which is recorded here. No test values have
+  been invented — this artifact records an environment separation, not a usable
+  public sandbox.
+self_service: false
+public_signup: false
+test_credentials_published: false
+magic_test_values_published: false
+test_clock: false
+fixture_tooling: false
+environments:
+- name: staging
+  base_url: https://api.staging.app.crimsoneducation.io
+  source: '@crimson-education/sdk README (createCrimsonClient apiUrl example)'
+  reachable: true
+  health: 'GET /health -> 200 {"message":"SUCCESS"}'
+  access: credentialed only — no anonymous or public test key is published
+- name: production
+  base_url: https://api.app.crimsoneducation.io
+  reachable: true
+  health: 'GET /health -> 200 {"message":"SUCCESS"}'
+separation_model:
+  mechanism: separate host per environment
+  key_prefixes: none published
+  mode_flag: none — the environment is selected by the apiUrl passed to the SDK client
+  notes: >-
+    Unlike providers that separate test and live by key prefix or a mode flag, Crimson
+    separates by base URL only. The same three auth modes apply to both hosts.
+local_development:
+  standalone_auth_helper: persistStandaloneAuth(payload)
+  description: >-
+    The SDK ships persistStandaloneAuth for non-iframe local debugging — it writes the
+    auth payload to localStorage and fires the ready event so an embedded app can be
+    run outside its parent frame. This is a developer convenience for local work, not
+    a hosted sandbox.
+  allowed_parents_override: NEXT_PUBLIC_ALLOWED_PARENTS
+gaps:
+- No public sandbox account or self-service test key
+- No published test data, fixtures or seeded tenant
+- No time simulation / test clocks
+- No trigger or simulation tooling
+x-evidence:
+  fetched: '2026-08-04'
+  sources:
+  - https://registry.npmjs.org/@crimson-education%2Fsdk
+  - https://api.staging.app.crimsoneducation.io/health
+  http_status: 200

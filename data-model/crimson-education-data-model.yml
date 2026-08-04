@@ -1,0 +1,195 @@
+generated: '2026-08-04'
+method: derived
+source: '@crimson-education/sdk v0.3.38 (README + package/dist/core/*.js and *.d.ts)'
+notes: >-
+  Entity graph derived from the first-party SDK's API modules, documented return
+  fields and path structure. Crimson publishes no OpenAPI, so there are no $ref
+  chains to walk; relationships below are read from documented id-reference fields
+  and from path nesting. Fields listed are only those the provider names explicitly.
+  Confidence is recorded per relationship.
+domains:
+- name: Roadmap
+  base_path: /roadmap
+  entities: [Roadmap, RoadmapContext, Mission, Task, Reflection, ReflectionComment, TemplateMission, TemplateTask, GradeTemplate, User]
+- name: Account & Identity
+  base_path: /api/v1
+  entities: [UserProfile, Role, Tenant, IndigoIdentity, StudentSummary, StudentProfile]
+- name: Delivery & Scheduling
+  base_path: /api/v1
+  entities: [PackageItem, Subject, Tutor, Booking]
+entities:
+- name: RoadmapContext
+  key: userId
+  operations: ['GET /roadmap/context?userId=', 'POST /roadmap/context']
+  notes: The per-student entry point that resolves a roadmapId for subsequent calls.
+- name: Mission
+  key: id
+  alt_keys: [linkId]
+  fields: [id, title, status, dueDate, roadmapId, category]
+  operations:
+  - GET /roadmap/missions
+  - POST /roadmap/missions
+  - PUT /roadmap/missions/{missionId}
+  - DELETE /roadmap/missions/{missionId}
+  - POST /roadmap/missions/batch
+  - POST /roadmap/missions/batch-delete
+  - POST /roadmap/missions/batch-restore
+  - PUT /roadmap/missions/{linkId}/team-members
+  - GET /roadmap/missions/{missionId}/detail
+  notes: >-
+    Carries a dual identity — a mission id and a linkId representing the mission's
+    attachment to a particular student roadmap. Update/delete are addressed by linkId
+    in the documented method signatures.
+- name: Task
+  aka: ActionItem
+  key: id
+  fields: [id, name, date, roadmapMissionId, userId, isComplete, status, description, dueDate, creatorId, priority, resources]
+  status_values_seen: [PLANNED, DONE]
+  operations:
+  - GET /roadmap/action-items
+  - GET /roadmap/action-items/creators
+  - POST /roadmap/action-items
+  - PUT /roadmap/action-items/{id}
+  - DELETE /roadmap/action-items/{id}
+  - POST /roadmap/action-items/{actionItemId}/resources
+  - POST /roadmap/action-items/bulk-create
+  - POST /roadmap/action-items/bulk-update
+  - POST /roadmap/action-items/bulk-delete
+  - POST /roadmap/action-items/activities
+  notes: >-
+    Can be mission-linked (roadmapMissionId / missionId) or standalone (roadmapId
+    only). Resources are file attachments backed by S3 presigned URLs.
+- name: Reflection
+  key: id
+  operations:
+  - GET /roadmap/reflections
+  - POST /roadmap/reflections
+  - PUT /roadmap/reflections/{id}
+  - DELETE /roadmap/reflections/{id}
+  - POST /roadmap/missions/{missionId}/reflections
+  - PUT /roadmap/missions/{missionId}/reflections/batch
+- name: ReflectionComment
+  key: commentId
+  operations:
+  - POST /roadmap/reflections/{reflectionId}/comments
+  - PUT /roadmap/reflections/comments/{commentId}
+  - DELETE /roadmap/reflections/comments/{commentId}
+  - DELETE /roadmap/reflections/{reflectionId}/comments
+- name: TemplateMission
+  key: missionId
+  operations:
+  - GET /roadmap/library/missions
+  - POST /roadmap/library/missions
+  - PUT /roadmap/library/missions/{id}
+  - DELETE /roadmap/library/missions/{id}
+  - POST /roadmap/library/missions/copy
+  - POST /roadmap/library/missions/assign-bulk
+  - POST /roadmap/library/missions/add-to-roadmap
+  notes: Catalog-level mission template that is copied or bulk-assigned onto student roadmaps.
+- name: TemplateTask
+  key: id
+  operations:
+  - GET /roadmap/library/tasks
+  - POST /roadmap/library/tasks/assign-bulk
+  - POST /roadmap/library/tasks/create-from-predefined
+- name: GradeTemplate
+  key: id
+  operations:
+  - POST /roadmap/grade-templates
+  - PUT /roadmap/grade-templates/{id}
+  - DELETE /roadmap/grade-templates/{id}
+  - POST /roadmap/grade-templates/{id}/missions
+  - DELETE /roadmap/grade-templates/missions/{missionId}
+  - POST /roadmap/grade-templates/{id}/submit-regional
+  - PATCH /roadmap/grade-templates/{id}/regional-review
+  - POST /roadmap/grade-templates/{id}/add-to-roadmap
+  notes: >-
+    Grade-level curriculum template with an explicit regional editorial workflow
+    (submit-regional then regional-review) before it can be applied to a roadmap.
+- name: User
+  key: userId
+  id_format: 'Auth0 subject (e.g. auth0|... / auth0-...)'
+  fields: [userId, firstName, lastName, email, profileImageId]
+  operations:
+  - GET /roadmap/users?ids=
+  - GET /roadmap/users/{studentId}/team-members
+  - GET /roadmap/user/regional-context
+- name: UserProfile
+  key: userId
+  fields: [userId, email, firstName, lastName, nickname, name, picture, status, isMultiTenant, roles, tenant]
+  operations: ['GET /api/v1/account/me/profile', 'GET /api/v1/account/me/roles', 'GET /api/v1/account/linked-tenants']
+- name: StudentSummary
+  key: userId
+  fields: [userId, firstName, lastName, email, profileImageUrl, source]
+  operations: ['GET /api/v1/account/me/students']
+- name: StudentProfile
+  key: studentId
+  operations: ['GET /api/v1/student-profile', 'GET /api/v1/student-profile/get-prefilled-info']
+- name: IndigoIdentity
+  key: userId
+  fields: [userId, email, firstName, lastName, role, tenantId, tenantName, isMultiTenant, relatedAccounts]
+  role_values: [student, tutor]
+  operations: ['GET /api/v1/indigo/me', 'GET /api/v1/indigo/student/tutors', 'GET /api/v1/indigo/tutor/students']
+  gating: requires an INDIGO product subscription
+- name: Tenant
+  key: id
+  fields: [id, name]
+  default: crimsonapp
+  notes: Selected on the wire by the x-tenant-domain header.
+- name: PackageItem
+  key: id
+  fields: [studentUserId, mentorUserId, subjectId, status, startDate, endDate, initialHours, remainingHours]
+  status_values: [ACTIVE, INACTIVE]
+  operations:
+  - GET /api/v1/package-items
+  - GET /api/v1/package-items/{id}
+  - PATCH /api/v1/package-items/{id}
+  - POST /api/v1/package-items
+  - POST /api/v1/package-items/{id}/pause
+  - POST /api/v1/package-items/{id}/resume
+  access: service key only
+  notes: A student's contracted subject line with a mentor and an hours balance.
+- name: Tutor
+  key: userId
+  operations: ['POST /api/v1/tutors', 'POST /api/v1/tutors/{id}/subjects']
+  notes: >-
+    A TUTOR user becomes an "expert" once subjects are assigned. Subjects are supplied
+    as {name, subjectId}.
+- name: Booking
+  key: eventId
+  fields: [name, start, end, calEventTypeId, calHostUserId]
+  operations: ['POST /api/v1/bookings/{eventId}/reschedule']
+  notes: Field names (calEventTypeId, calHostUserId) indicate a Cal.com-backed scheduling layer.
+relationships:
+- {from: RoadmapContext, to: User, type: belongs_to, via: userId, confidence: high}
+- {from: Mission, to: Roadmap, type: belongs_to, via: roadmapId, confidence: high}
+- {from: Mission, to: Task, type: has_many, via: roadmapMissionId, confidence: high}
+- {from: Mission, to: Reflection, type: has_many, via: 'path /roadmap/missions/{missionId}/reflections', confidence: high}
+- {from: Mission, to: User, type: has_many, via: team-members, confidence: high}
+- {from: Task, to: User, type: belongs_to, via: userId, confidence: high}
+- {from: Task, to: User, type: belongs_to, via: creatorId, relation: creator, confidence: high}
+- {from: Task, to: Resource, type: has_many, via: resources, confidence: high}
+- {from: Reflection, to: ReflectionComment, type: has_many, via: reflectionId, confidence: high}
+- {from: TemplateMission, to: Mission, type: source_of, via: 'copy / assign-bulk / add-to-roadmap', confidence: high}
+- {from: TemplateMission, to: TemplateTask, type: has_many, via: 'create-from-predefined (missionId + predefinedTaskIds)', confidence: high}
+- {from: GradeTemplate, to: TemplateMission, type: has_many, via: 'POST /roadmap/grade-templates/{id}/missions', confidence: high}
+- {from: GradeTemplate, to: Roadmap, type: source_of, via: add-to-roadmap, confidence: high}
+- {from: UserProfile, to: Role, type: has_many, via: 'roles[] {roleId, roleName, isPrimary}', confidence: high}
+- {from: UserProfile, to: Tenant, type: belongs_to, via: tenant, confidence: high}
+- {from: PackageItem, to: User, type: belongs_to, via: studentUserId, confidence: high}
+- {from: PackageItem, to: Tutor, type: belongs_to, via: mentorUserId, confidence: high}
+- {from: PackageItem, to: Subject, type: belongs_to, via: subjectId, confidence: high}
+- {from: Tutor, to: Subject, type: has_many, via: 'POST /api/v1/tutors/{id}/subjects', confidence: high}
+- {from: IndigoIdentity, to: Tutor, type: has_many, via: /api/v1/indigo/student/tutors, confidence: high}
+- {from: IndigoIdentity, to: StudentSummary, type: has_many, via: /api/v1/indigo/tutor/students, confidence: high}
+- {from: Booking, to: Tutor, type: belongs_to, via: calHostUserId, confidence: medium}
+coverage:
+  entities: 18
+  relationships: 22
+  derived_from_openapi: false
+  derived_from_sdk: true
+x-evidence:
+  fetched: '2026-08-04'
+  url: https://registry.npmjs.org/@crimson-education%2Fsdk
+  http_status: 200
+  package_version: 0.3.38

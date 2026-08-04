@@ -1,18 +1,59 @@
 aid: crimson-education
 name: Crimson Education
-description: 'Crimson Education is a company surfaced via the API Evangelist harvest backlog (source:
-  secondary-market) and added to the network as a stub for full-pipeline profiling.'
+description: 'Crimson Education is a multinational university admissions consultancy
+  founded in Auckland, New Zealand in 2013 by Jamie Beaton, Fangzhou Jiang and Sharndre
+  Kushor. It provides college-prep and admissions consulting for US, UK, EU and Australian
+  universities, graduate and medical school admissions support, curriculum tutoring
+  and extracurricular mentoring, and operates the Crimson Global Academy online high
+  school alongside brands including MedView, Crimson MBA and Unfiltered. Its student
+  and mentor experience runs on the Crimson App, whose backend REST and GraphQL surface
+  is reached through a first-party TypeScript SDK published on npm as @crimson-education/sdk.'
 url: https://raw.githubusercontent.com/api-evangelist/crimson-education/refs/heads/main/apis.yml
 x-type: company
 x-source: harvest:secondary-market
-x-tier: stub
-x-tier-reason: harvest
+image: https://app.crimsoneducation.org/static/PWAConfig/crimsonApp/icons/icon-192x192.png
 specificationVersion: '0.20'
+x-enrichment:
+  date: '2026-08-04'
+  status: enriched
+  artifacts_added: 13
+  pass: local-v1
 created: '2026-08-04'
 modified: '2026-08-04'
 tags:
 - Company
-apis: []
+- Education
+- EdTech
+- Admissions
+- Tutoring
+- Students
+- Online Learning
+- Mentoring
+apis:
+- name: Crimson App API
+  description: 'The backend API behind the Crimson App student and mentor platform.
+    There is no provider-published OpenAPI or public developer portal; the surface
+    is documented and exercised through the first-party TypeScript SDK @crimson-education/sdk
+    on npm, which names concrete REST paths under /roadmap/* and /api/v1/* (missions,
+    action items, reflections, roadmap context, mission library, grade templates,
+    package items, tutors, bookings, student profile, account and Indigo identity)
+    plus a token-gated GraphQL endpoint at /graphql. Access is by Auth0 bearer JWT,
+    a server-to-server crimsonauthkey service key, or an OAuth 2.0 authorization-code
+    with PKCE flow the SDK implements but whose backend endpoints the SDK documents
+    as not yet deployed.'
+  humanURL: https://www.npmjs.com/package/@crimson-education/sdk
+  baseURL: https://api.app.crimsoneducation.io
+  tags:
+  - Education
+  - Admissions
+  - Roadmap
+  - Tasks
+  - Tutoring
+  properties:
+  - type: SDKs
+    url: packages/crimson-education-packages.yml
+  - type: Authentication
+    url: authentication/crimson-education-authentication.yml
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
@@ -20,4 +61,42 @@ maintainers:
   email: info@apis.io
 common:
 - type: Website
-  url: https://forgeglobal.com/crimson-education_stock/
+  url: https://www.crimsoneducation.org/us
+- type: Blog
+  url: https://www.crimsoneducation.org/us/blog
+- type: PrivacyPolicy
+  url: https://www.crimsoneducation.org/us/privacy-policy
+- type: GitHubOrganization
+  url: https://github.com/crimson-education
+- type: Login
+  url: https://app.crimsoneducation.org/
+- type: Careers
+  url: https://jobs.crimsoneducation.org/
+- type: Packages
+  url: packages/crimson-education-packages.yml
+- type: SDKs
+  url: packages/crimson-education-packages.yml
+- type: Components
+  url: components/crimson-education-components.yml
+- type: Authentication
+  url: authentication/crimson-education-authentication.yml
+- type: Conventions
+  url: conventions/crimson-education-conventions.yml
+- type: ErrorCatalog
+  url: errors/crimson-education-problem-types.yml
+- type: DataModel
+  url: data-model/crimson-education-data-model.yml
+- type: Lifecycle
+  url: lifecycle/crimson-education-lifecycle.yml
+- type: ChangeLog
+  url: changelog/crimson-education-changelog.yml
+- type: Sandbox
+  url: sandbox/crimson-education-sandbox.yml
+- type: Conformance
+  url: conformance/crimson-education-conformance.yml
+- type: WellKnown
+  url: well-known/crimson-education-well-known.yml
+- type: DomainSecurity
+  url: security/crimson-education-domain-security.yml
+- type: LLMsTxt
+  url: llms/crimson-education-llms.txt

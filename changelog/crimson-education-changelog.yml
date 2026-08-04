@@ -1,0 +1,47 @@
+generated: '2026-08-04'
+method: searched
+source: https://registry.npmjs.org/@crimson-education%2Fsdk
+scope: sdk-release-history
+notes: >-
+  Crimson Education publishes no API changelog, no release-notes page and no
+  developer portal. The only dated, publicly published release record for the Crimson
+  App API surface is the npm version history of the first-party SDK
+  @crimson-education/sdk. Entries below are the registry's own publish timestamps —
+  no release notes accompany them, so no highlights or breaking-change flags have
+  been invented.
+scheme: semver
+current_version: 0.3.38
+package: '@crimson-education/sdk'
+url: https://www.npmjs.com/package/@crimson-education/sdk?activeTab=versions
+first_published: '2025-12-30'
+total_releases: 45
+release_notes_published: false
+breaking_change_policy_published: false
+entries:
+- {version: 0.3.38, date: '2026-07-27'}
+- {version: 0.3.37-regional-template, date: '2026-07-24', note: 'prerelease tag names the regional grade-template review workflow'}
+- {version: 0.3.36, date: '2026-07-12'}
+- {version: 0.3.35, date: '2026-06-11'}
+- {version: 0.3.34, date: '2026-06-10'}
+- {version: 0.3.33, date: '2026-06-09'}
+- {version: 0.3.32, date: '2026-06-08'}
+- {version: 0.3.31, date: '2026-05-29'}
+- {version: 0.3.30, date: '2026-05-28'}
+- {version: 0.3.29, date: '2026-05-26'}
+- {version: 0.3.28, date: '2026-05-22'}
+- {version: 0.3.27, date: '2026-05-08'}
+- {version: 0.3.26, date: '2026-04-17'}
+- {version: 0.3.25, date: '2026-03-30'}
+- {version: 0.3.24, date: '2026-03-27'}
+related_packages:
+- {package: '@crimson-education/browser-logger', current: 5.0.10, latest_release: '2026-07-23'}
+- {package: '@crimson-education/replit-sdk', current: 1.0.2-beta-19, latest_release: '2026-04-07'}
+- {package: '@crimson-education/helios-editor-renderer', current: 1.1.8, latest_release: '2026-05-14'}
+gaps:
+- No human-readable changelog or release notes for either the API or the SDK
+- No dated API-level change record independent of package publishes
+x-evidence:
+  fetched: '2026-08-04'
+  url: https://registry.npmjs.org/@crimson-education%2Fsdk
+  http_status: 200
+  field: time

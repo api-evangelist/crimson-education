@@ -1,0 +1,78 @@
+generated: '2026-08-04'
+method: probed
+source: live GET of /.well-known/* on every Crimson Education host in apis.yml
+notes: >-
+  No .well-known document is published on any Crimson Education host. Two probe
+  hazards were ruled out and are recorded here so a later round does not re-report
+  them as hits: (1) app.crimsoneducation.org is a single-page app whose catch-all
+  answers HTTP 200 with the same text/html shell for every path, including
+  /.well-known/agent-card.json, /llms.txt and /openapi.json — these are NOT
+  documents; (2) www.crimsoneducation.org sits behind a Vercel bot checkpoint that
+  answers 429 with an HTML "Vercel Security Checkpoint" interstitial for text
+  resources, so its .well-known surface could not be observed rather than confirmed
+  absent.
+hosts:
+- host: https://api.app.crimsoneducation.io
+  role: production API base URL
+  documents:
+  - {path: /.well-known/security.txt, status: 404}
+  - {path: /.well-known/openid-configuration, status: 404}
+  - {path: /.well-known/oauth-authorization-server, status: 404}
+  - {path: /.well-known/oauth-protected-resource, status: 404}
+  - {path: /.well-known/agent-card.json, status: 404}
+  - {path: /.well-known/agent.json, status: 404}
+  - {path: /llms.txt, status: 404}
+  - {path: /openapi.json, status: 404}
+  - {path: /swagger.json, status: 404}
+  - {path: /api-docs, status: 404}
+  - {path: /health, status: 200, note: 'returns {"message":"SUCCESS"} — liveness only, not a discovery document'}
+  - {path: /graphql, status: 401, note: 'live GraphQL endpoint; "No authorization provided" — introspection is auth-gated'}
+- host: https://api.staging.app.crimsoneducation.io
+  role: staging API base URL (named in the @crimson-education/sdk README)
+  documents:
+  - {path: /.well-known/security.txt, status: 404}
+  - {path: /.well-known/openid-configuration, status: 404}
+  - {path: /.well-known/oauth-authorization-server, status: 404}
+  - {path: /.well-known/oauth-protected-resource, status: 404}
+  - {path: /.well-known/agent-card.json, status: 404}
+  - {path: /.well-known/agent.json, status: 404}
+  - {path: /llms.txt, status: 404}
+  - {path: /openapi.json, status: 404}
+  - {path: /health, status: 200}
+  - {path: /graphql, status: 401}
+- host: https://app.crimsoneducation.org
+  role: Crimson App web client (SPA)
+  spa_catch_all: true
+  documents:
+  - {path: /.well-known/security.txt, status: 200, content_type: text/html, verdict: false-positive-spa-shell}
+  - {path: /.well-known/agent-card.json, status: 200, content_type: text/html, verdict: false-positive-spa-shell}
+  - {path: /.well-known/agent.json, status: 200, content_type: text/html, verdict: false-positive-spa-shell}
+  - {path: /llms.txt, status: 200, content_type: text/html, verdict: false-positive-spa-shell}
+  - {path: /openapi.json, status: 200, content_type: text/html, verdict: false-positive-spa-shell}
+  - {path: /swagger.json, status: 200, content_type: text/html, verdict: false-positive-spa-shell}
+- host: https://www.crimsoneducation.org
+  role: marketing website
+  bot_protection: 'Vercel Security Checkpoint (HTTP 429 HTML interstitial)'
+  documents:
+  - {path: /.well-known/security.txt, status: 429, verdict: blocked-not-observed}
+  - {path: /.well-known/agent-card.json, status: 429, verdict: blocked-not-observed}
+  - {path: /llms.txt, status: 429, verdict: blocked-not-observed}
+  - {path: /robots.txt, status: 429, verdict: blocked-not-observed}
+  - {path: /sitemap.xml, status: 200, content_type: application/xml, note: 'sitemap index served; per-region sitemaps behind the same checkpoint'}
+hosts_with_no_dns:
+- api.crimsoneducation.org
+- developer.crimsoneducation.org
+- docs.crimsoneducation.org
+- status.crimsoneducation.org
+- trust.crimsoneducation.org
+- security.crimsoneducation.org
+summary:
+  security_txt: false
+  openid_configuration: false
+  oauth_authorization_server: false
+  api_catalog: false
+  ai_plugin: false
+  agent_card: false
+x-evidence:
+  fetched: '2026-08-04'
+  method: curl HTTPS GET, status and content-type recorded per path

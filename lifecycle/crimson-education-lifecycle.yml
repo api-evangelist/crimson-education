@@ -1,0 +1,85 @@
+generated: '2026-08-04'
+method: derived
+source: '@crimson-education/sdk v0.3.38 + live host probes'
+notes: >-
+  Crimson Education publishes no API versioning policy, no deprecation policy, no
+  SLA and no status page. Everything below is derived from the SDK and from probes;
+  absences are recorded as absences and no StatusPage or Deprecation pointer is
+  emitted.
+versioning:
+  scheme: mixed uri-path
+  current: v1
+  detail: >-
+    Two prefixes coexist on the same host. Newer surfaces (account, indigo,
+    package-items, tutors, bookings, student-profile) sit under /api/v1/*. The
+    original roadmap surface (missions, action-items, reflections, context, users,
+    library, grade-templates, upload/download) is unversioned under /roadmap/*.
+  docs: null
+  policy_published: false
+client_versioning:
+  scheme: semver
+  package: '@crimson-education/sdk'
+  current: 0.3.38
+  status: pre-1.0
+  first_published: '2025-12-30'
+  latest_published: '2026-07-27'
+  releases: 45
+  notes: >-
+    The SDK is pre-1.0 and ships breaking-capable minor/patch releases; it also sends
+    its own version to the backend as the X-Client-Version header for call
+    attribution.
+compatibility_signals:
+- signal: legacy response shape retained
+  detail: >-
+    GET /roadmap/missions returns the legacy grouped MissionsCategory[] when
+    start/limit are omitted and a paginated result when they are supplied; the SDK's
+    listPaginated() converts the legacy shape when an older backend answers. This is
+    a real backwards-compatibility accommodation, documented by the provider.
+- signal: field normalization
+  detail: >-
+    The SDK normalizes action-item fields (name/description, date/dueDate,
+    roadmapMissionId/missionId/linkId, userId/creatorId), indicating more than one
+    generation of backend field naming is in service.
+deprecation:
+  policy_url: null
+  policy_published: false
+  sunset_header: unknown
+  deprecation_header: unknown
+  deprecated_operations: []
+  notes: No deprecation or sunset policy is published, and no deprecated operations are marked.
+sla:
+  url: null
+  uptime_target: null
+  published: false
+status_page:
+  url: null
+  published: false
+  probed:
+  - {host: status.crimsoneducation.org, result: NXDOMAIN}
+  - {host: status.crimsoneducation.io, result: not published}
+  notes: >-
+    A liveness endpoint exists (GET /health returns {"message":"SUCCESS"} on both the
+    production and staging API hosts) but that is a health check, not a public status
+    page, and no StatusPage pointer is emitted for it.
+environments:
+- {name: production, base_url: 'https://api.app.crimsoneducation.io', health: 'GET /health -> 200'}
+- {name: staging, base_url: 'https://api.staging.app.crimsoneducation.io', health: 'GET /health -> 200'}
+availability_posture:
+  public_signup: false
+  public_developer_portal: false
+  access_model: >-
+    Access appears to be partner/internal — service keys are allowlisted server-side
+    via CRIMSON_APP_ACCESS_KEYS, and the OAuth flow that would let third parties
+    onboard is implemented in the SDK but explicitly not deployed on the backend.
+gaps:
+- No published versioning policy
+- No published deprecation or sunset policy
+- No SLA
+- No public status page
+- No public API changelog (only npm SDK release history — see changelog/)
+x-evidence:
+  fetched: '2026-08-04'
+  sources:
+  - https://registry.npmjs.org/@crimson-education%2Fsdk
+  - https://api.app.crimsoneducation.io/health
+  - https://api.staging.app.crimsoneducation.io/health

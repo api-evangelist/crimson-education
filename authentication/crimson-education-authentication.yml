@@ -1,0 +1,95 @@
+generated: '2026-08-04'
+method: searched
+source: https://www.npmjs.com/package/@crimson-education/sdk
+docs: https://www.npmjs.com/package/@crimson-education/sdk
+notes: >-
+  Crimson Education publishes no OpenAPI and no developer-portal auth page, so this
+  profile is read from the first-party SDK @crimson-education/sdk (v0.3.38), whose
+  README documents three mutually exclusive authentication modes on CrimsonClient.
+  The SDK is the provider's own published artifact; nothing here is inferred beyond
+  what it states.
+summary:
+  types: [http, apiKey, oauth2]
+  http_schemes: [bearer]
+  api_key_in: [header]
+  oauth2_flows: [authorizationCode]
+  oauth2_status: not-deployed
+  mutually_exclusive: true
+schemes:
+- name: bearerAuth
+  type: http
+  scheme: bearer
+  bearerFormat: JWT
+  header: 'Authorization: Bearer <token>'
+  sdk_config: getToken
+  status: available
+  token_issuer: Auth0 (Crimson Auth0 JWT)
+  audience: >-
+    Embedded iframe sub-apps whose parent injects the JWT over postMessage, and any
+    frontend or backend already holding a token the Crimson backend accepts.
+  notes: >-
+    The SDK strips a leading "Bearer " from whatever getToken() returns before
+    concatenating. In embedded contexts the React layer (<CrimsonProvider>) reads the
+    token from xprops/localStorage automatically, so getToken is not hand-written.
+- name: serviceKey
+  type: apiKey
+  in: header
+  parameter_name: Authorization
+  header: 'Authorization: crimsonauthkey <key>'
+  auth_scheme: crimsonauthkey
+  sdk_config: serviceKey
+  status: available
+  audience: trusted server-to-server backends with no end-user login
+  privilege: >-
+    Service-level credential. The SDK README states that a key matching the backend
+    CRIMSON_APP_ACCESS_KEYS allowlist is treated as isServer and BYPASSES per-user
+    RBAC; data scope is then determined by the x-tenant-domain header plus any
+    explicitly passed userId.
+  guardrails:
+  - SDK throws if serviceKey is used in a browser environment
+  - SDK throws if serviceKey is empty
+  - tenantDomain is effectively required; requests without it fall back to the default
+    "crimsonapp" tenant with a warning, and package-item list calls 400
+  - provider documents the key as god-mode, backend-only, never in frontend code or
+    source control, and to be rotated
+- name: oauth2
+  type: oauth2
+  sdk_config: oauth
+  status: not-deployed
+  flows:
+  - flow: authorizationCode
+    pkce: true
+    authorizationUrl: /oauth/authorize
+    tokenUrl: /oauth/token
+    scopes:
+    - scope: profile
+      description: 'Documented in the SDK example scope array; no published scope reference exists.'
+  notes: >-
+    The SDK implements authorize(), handleOAuthCallback({code,state}), token refresh,
+    isAuthenticated() and logout(), but the README states explicitly that the backend
+    /oauth/authorize and /oauth/token endpoints are NOT yet deployed and the mode is
+    therefore unusable. Recorded as declared-but-unavailable, not as a live OAuth
+    surface.
+tenancy:
+  header: x-tenant-domain
+  sdk_config: tenantDomain
+  default: crimsonapp
+  required_for: service-key mode
+  example_value: app.crimsoneducation.org
+  notes: >-
+    In bearer mode the tenant is resolved from the user; in service-key mode there is
+    no end user, so the tenant must be named explicitly.
+identity_endpoints:
+- {path: /api/v1/account/me/profile, returns: 'userId, email, firstName, lastName, nickname, name, picture, status, isMultiTenant, roles[], tenant'}
+- {path: /api/v1/account/me/roles, returns: 'userId, roles[{roleId,isPrimary}]'}
+- {path: /api/v1/account/linked-tenants, returns: linked tenant accounts for multi-tenant users}
+- {path: /api/v1/indigo/me, returns: 'Indigo identity: role student|tutor, tenantId, tenantName, isMultiTenant, relatedAccounts[]', requires: INDIGO product subscription}
+discovery:
+  openid_configuration: absent (404 on both API hosts)
+  oauth_authorization_server: absent (404 on both API hosts)
+  oauth_protected_resource: absent (404 on both API hosts)
+x-evidence:
+  fetched: '2026-08-04'
+  url: https://registry.npmjs.org/@crimson-education%2Fsdk
+  http_status: 200
+  package_version: 0.3.38

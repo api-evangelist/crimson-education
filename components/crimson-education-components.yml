@@ -1,0 +1,98 @@
+generated: '2026-08-04'
+method: searched
+source: https://www.npmjs.com/package/@crimson-education/sdk
+notes: >-
+  Crimson Education ships a genuine client-side embedding surface, distinct from the
+  server-side API client: an iframe/postMessage handshake plus a React binding layer,
+  and a dedicated SDK for embedding Replit-hosted applications into the Crimson App.
+  These are the provider's own published packages.
+families:
+- name: Embedded iframe layer
+  package: '@crimson-education/sdk'
+  entry: '@crimson-education/sdk (main entry re-exports the iframe layer)'
+  purpose: >-
+    Lets a Crimson-hosted sub-application running inside an iframe receive its auth
+    context from the parent Crimson App over postMessage, instead of implementing
+    login itself.
+  api:
+  - {name: setupIframeListener, signature: '(allowedOrigins?: string[]) => CleanupFn', description: 'installs the postMessage listener; falls back to a default origin allowlist or NEXT_PUBLIC_ALLOWED_PARENTS'}
+  - {name: getToken, description: returns the injected auth token}
+  - {name: getUserId, description: returns the injected user id}
+  - {name: getStudentId, description: returns the injected student id}
+  - {name: getAuthState, signature: '() => AuthState'}
+  - {name: subscribeToAuthState, signature: '(cb) => unsubscribe'}
+  - {name: persistStandaloneAuth, signature: '(payload: ZoidProps)', description: 'writes auth to localStorage for non-iframe local debugging'}
+  constants: [XPROPS_READY_EVENT, STORAGE_KEYS, VIRTUAL_MISSION_ID]
+  handshake:
+    direction: parent -> iframe
+    message_type: INIT
+    payload_fields: [token, userId, studentId, user]
+    transport: window.postMessage with an explicit target origin
+  known_embedded_apps: [new-roadmap, indigo, capstone]
+- name: React binding layer
+  package: '@crimson-education/sdk/react'
+  peer_dependencies: ['react >=18', '@tanstack/react-query >=5']
+  purpose: >-
+    Provider plus hooks that wire the SDK client, the iframe auth handshake and
+    TanStack Query together so an embedded app needs no auth or fetch plumbing.
+  provider:
+    name: CrimsonProvider
+    props: [apiUrl, clientId, allowedParentOrigins, queryClient]
+    behaviour:
+    - creates and injects a CrimsonClient carrying clientId
+    - reads the token automatically from iframe xprops / localStorage
+    - installs QueryClientProvider
+    - installs setupIframeListener
+  hooks:
+    auth: [useAuthState]
+    missions: [useMissions, useMissionsInfinite, useCreateMission, useUpdateMission, useDeleteMission]
+    tasks: [useTasks, useTasksInfinite, useTaskCreators, useCreateTask, useUpdateTask, useDeleteTask, useGetDownloadUrl]
+    roadmap: [useRoadmapContext]
+    library: [useTemplateMissions, useTemplateMissionsInfinite, useTemplateTasks, useTemplateTasksInfinite, useTemplateMissionDetail, useCreateTemplateMission, useUpdateTemplateMission]
+    identity: [useIndigoMe, useStudentTutors, useTutorStudents, useAccount]
+    other: [useBookings, useGradeTemplates, usePackageItems, useReflections, useStudentProfile, useTutors, useUsers, useOAuth]
+- name: Replit app integration
+  package: '@crimson-education/replit-sdk'
+  version: 1.0.2-beta-19
+  url: https://www.npmjs.com/package/@crimson-education/replit-sdk
+  purpose: >-
+    Rapid integration of Replit-hosted applications into the Crimson ecosystem as
+    iframe-embedded apps. Environment variables and user parameters are passed in via
+    URL query string or hash, held in memory for the session.
+  api:
+  - {name: bindApi, signature: '(app)', description: 'binds /api/function routes on an Express app to forward GraphQL requests'}
+  - {name: graphqlProxySchema, description: 'Zod schema for the GraphQL proxy request body'}
+  - {name: ExternalLink, kind: react-component, description: 'handles navigation to external URLs out of the iframe'}
+  - {name: useUrlParams, kind: react-hook, description: 'extracts and stores auth tokens and API endpoints from the URL'}
+  - {name: getStoredParam / setStoredParams, description: persisted parameter helpers}
+  - {name: fetchLoginUser, description: Crimson API call helper}
+  - {name: fetchMyStudents, description: Crimson API call helper}
+  - {name: initDatadog, description: Datadog initialization}
+  - {name: trackEvent, description: analytics helper}
+- name: Observability loader
+  package: '@crimson-education/browser-logger'
+  version: 5.0.10
+  url: https://www.npmjs.com/package/@crimson-education/browser-logger
+  purpose: >-
+    Structured browser logging and analytics reporting used across Crimson frontends
+    including Replit-hosted apps; splits Datadog Logs, PostHog product analytics and
+    allowlisted session replay. Initialized with Logger.init({service, application,
+    environment}).
+- name: Content renderer
+  package: '@crimson-education/helios-editor-renderer'
+  version: 1.1.8
+  url: https://www.npmjs.com/package/@crimson-education/helios-editor-renderer
+  purpose: Renders the Crimson "Helios" editor content format in the client.
+distinction_from_sdks:
+  server_side_clients: packages/crimson-education-packages.yml
+  note: >-
+    The same npm scope carries both the API client and these client-side embedding
+    components; they are catalogued separately because the components are a UI/embed
+    surface, not a server-side API client.
+x-evidence:
+  fetched: '2026-08-04'
+  sources:
+  - https://registry.npmjs.org/@crimson-education%2Fsdk
+  - https://registry.npmjs.org/@crimson-education%2Freplit-sdk
+  - https://registry.npmjs.org/@crimson-education%2Fbrowser-logger
+  http_status: 200

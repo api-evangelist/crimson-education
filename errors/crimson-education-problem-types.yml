@@ -1,0 +1,76 @@
+generated: '2026-08-04'
+method: derived
+source: '@crimson-education/sdk v0.3.38 (README + package/dist/core/*.js)'
+format: http-status
+notes: >-
+  Crimson Education publishes no OpenAPI, no error reference and no problem-details
+  schema. This catalog is derived only from error behaviour the first-party SDK
+  actually documents or implements, plus statuses observed on live anonymous probes.
+  It is deliberately thin — no error codes, titles or remediation text have been
+  invented.
+envelope:
+  rfc9457: false
+  content_type_observed: text/plain; charset=utf-8 (on anonymous 401/404 probes)
+  client_surface: 'Error("Crimson SDK Error: <status> ... - <body>")'
+  notes: >-
+    The SDK does not parse a structured error body. Any non-2xx response is raised as
+    a generic Error whose message concatenates the HTTP status and the raw response
+    body, so the response body shape is not part of the published contract.
+problems:
+- status: 400
+  title: Bad request
+  evidence: >-
+    SDK README states the backend returns 400 for a package-item list request that
+    omits the x-tenant-domain header.
+  source: packages/crimson-education-packages.yml#@crimson-education/sdk
+  operations: ['GET /api/v1/package-items']
+- status: 401
+  title: Unauthorized
+  observed: true
+  evidence: >-
+    Anonymous GET https://api.app.crimsoneducation.io/graphql returns 401 with body
+    "No authorization provided" (text/plain).
+  probed: '2026-08-04'
+- status: 403
+  title: Forbidden
+  evidence: >-
+    Implied by the documented access model — Indigo endpoints require an INDIGO
+    product subscription and per-user RBAC applies in bearer mode. The provider does
+    not document the status code returned, so this entry records the condition, not a
+    confirmed code.
+  confidence: low
+- status: 404
+  title: Not found
+  observed: true
+  evidence: >-
+    Anonymous GET of unrouted paths on api.app.crimsoneducation.io returns 404 with
+    body "Not Found" (text/plain). The SDK README also notes getMissionById throws
+    when the backend returns non-2xx such as 404, and recommends try/catch.
+  operations: ['GET /roadmap/missions/{missionId}/detail']
+  probed: '2026-08-04'
+client_side_errors:
+  notes: >-
+    The SDK raises these locally before any request is made; they are not API
+    responses but are part of the developer-facing error surface.
+  cases:
+  - condition: serviceKey used in a browser environment
+    behaviour: SDK throws immediately
+  - condition: serviceKey configured but empty (e.g. unset environment variable)
+    behaviour: SDK throws immediately
+  - condition: more than one of getToken / serviceKey / oauth configured
+    behaviour: rejected at TypeScript compile time
+  - condition: tenantDomain unset in service mode
+    behaviour: SDK warns and falls back to the default "crimsonapp" tenant
+  - condition: fetch unavailable (Node < 18)
+    behaviour: 'ReferenceError: fetch is not defined — provider recommends Node 18+ or a polyfill'
+gaps:
+- No published error-code registry or catalog
+- No application/problem+json (RFC 9457) support
+- No documented machine-readable error body schema
+- No documented rate-limit or retry-after semantics
+x-evidence:
+  fetched: '2026-08-04'
+  sources:
+  - https://registry.npmjs.org/@crimson-education%2Fsdk
+  - https://api.app.crimsoneducation.io/graphql
+  - https://api.app.crimsoneducation.io/openapi.json

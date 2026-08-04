@@ -1,0 +1,119 @@
+generated: '2026-08-04'
+method: searched
+source: https://www.npmjs.com/package/@crimson-education/sdk
+notes: >-
+  Cross-cutting request/response semantics for the Crimson App API, read from the
+  first-party SDK @crimson-education/sdk v0.3.38 (README plus the published dist/).
+  Crimson publishes no OpenAPI, so the SDK is the contract of record.
+authentication:
+  style: 'Authorization header; Bearer JWT, or "crimsonauthkey <key>" for service mode'
+  see: authentication/crimson-education-authentication.yml
+base_url:
+  configurable: true
+  sdk_field: apiUrl
+  trailing_slash: stripped by the SDK
+  production: https://api.app.crimsoneducation.io
+  staging: https://api.staging.app.crimsoneducation.io
+idempotency:
+  supported: false
+  header: null
+  notes: >-
+    No idempotency key header, parameter or retry contract is documented anywhere in
+    the SDK or its compiled client. Batch endpoints exist (/roadmap/missions/batch,
+    /roadmap/action-items/bulk-create) but they are multi-operation, not idempotent
+    replays. No Idempotency pointer is emitted for this provider.
+pagination:
+  style: offset-limit
+  variants:
+  - surface: /roadmap/* (missions, action items, library, reflections)
+    params: [start, limit]
+    response: '{ data: [...], pagination: {...} }'
+    notes: >-
+      Dual-shape. Omitting start/limit on /roadmap/missions returns the legacy
+      grouped MissionsCategory[] structure; supplying them returns a paginated
+      result. The SDK exposes listPaginated() helpers that always normalize to the
+      paginated shape, converting the legacy structure when the backend returns it.
+  - surface: /api/v1/package-items
+    params: [limit, offset]
+    defaults: {limit: 50}
+    maximum: {limit: 200}
+    response: '{ items, total, limit, offset }'
+response_envelope:
+  shape: '{ data: ... } or { data: ..., pagination: ... }'
+  sdk_unwrapping: >-
+    CrimsonClient.fetch unwraps { data } to data when there is no pagination field;
+    when pagination is present the whole object is returned as PaginatedResult<T>.
+    An empty response (e.g. 204) yields undefined.
+  inconsistency_note: >-
+    Two envelopes coexist: /roadmap/* and most /api/v1/* use { data }, while
+    /api/v1/package-items returns { items, total, limit, offset } directly.
+filtering:
+  missions: ['status[]', title, roadmapId, groupBy, dueDateStart, dueDateEnd, start, limit]
+  tasks: ['status[]', description, creatorId, dueDateStart, dueDateEnd, orderBy, start, limit]
+  tasks_order_by: [priority, dueDate, missionTitle, createdAt]
+  package_items: [studentUserId, mentorUserId, subjectId, status, updatedSince, limit, offset]
+  incremental_sync:
+    supported: true
+    surface: /api/v1/package-items
+    param: updatedSince
+    format: ISO 8601
+  date_format: ISO 8601
+field_normalization:
+  applies_to: action items (tasks)
+  notes: >-
+    The SDK normalizes backend action items to a core shape (id, name, date,
+    roadmapMissionId, userId, isComplete), preferring name over description, date
+    over dueDate, roadmapMissionId over missionId/linkId, userId over creatorId, and
+    deriving isComplete from status === DONE or finishedAt. Raw backend fields may
+    therefore not be visible through the SDK.
+request_tracing:
+  request_id_response_header: X-Request-ID
+  client_identification_headers:
+  - {header: X-Client-ID, description: calling application identifier, examples: [new-roadmap, capstone]}
+  - {header: X-Client-Version, description: SDK version}
+  - {header: X-Client-Platform, description: runtime, values: [browser, node]}
+  server_logging: >-
+    The provider documents a structured backend log record per request carrying type,
+    request_id, client_id, client_version, client_platform, auth_mode, user_id,
+    tenant, method, path, status, duration_ms and timestamp.
+  best_practice_stated: always set clientId so calls are attributable per application
+multi_tenancy:
+  header: x-tenant-domain
+  see: authentication/crimson-education-authentication.yml
+versioning:
+  scheme: mixed uri-path
+  versioned_prefix: /api/v1
+  unversioned_prefix: /roadmap
+  see: lifecycle/crimson-education-lifecycle.yml
+error_envelope:
+  transport: HTTP status code
+  sdk_behaviour: 'non-2xx throws Error("Crimson SDK Error: <status> ... - <body>")'
+  problem_json: false
+  see: errors/crimson-education-problem-types.yml
+rate_limiting:
+  documented: false
+  headers: null
+  notes: No rate-limit policy or response headers are documented in the SDK or elsewhere publicly.
+file_transfer:
+  pattern: S3 presigned URLs
+  upload: 'POST /roadmap/upload returns { putUrl, url, key, bucket }; client PUTs the body directly to putUrl'
+  download: 'GET /roadmap/download?key=... returns a presigned download URL'
+graphql:
+  endpoint: /graphql
+  status: live but auth-gated (HTTP 401 "No authorization provided" anonymously)
+  introspection: not available anonymously
+  partner_proxy: >-
+    @crimson-education/replit-sdk binds an Express /api/function route that forwards
+    GraphQL requests on behalf of embedded Replit apps.
+cross_links:
+  authentication: authentication/crimson-education-authentication.yml
+  errors: errors/crimson-education-problem-types.yml
+  lifecycle: lifecycle/crimson-education-lifecycle.yml
+  data_model: data-model/crimson-education-data-model.yml
+  components: components/crimson-education-components.yml
+x-evidence:
+  fetched: '2026-08-04'
+  url: https://registry.npmjs.org/@crimson-education%2Fsdk
+  http_status: 200
+  package_version: 0.3.38
+  also: 'compiled package/dist/core/*.js from the published npm tarball'
