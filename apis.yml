@@ -12,7 +12,7 @@ url: https://raw.githubusercontent.com/api-evangelist/crimson-education/refs/hea
 x-type: company
 x-source: harvest:secondary-market
 image: https://app.crimsoneducation.org/static/PWAConfig/crimsonApp/icons/icon-192x192.png
-specificationVersion: '0.20'
+specificationVersion: '0.23'
 x-enrichment:
   date: '2026-08-04'
   status: enriched
