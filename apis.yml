@@ -46,6 +46,12 @@ apis:
   tags:
   - Education
   - Admissions
+  - Roadmaps
+  - Task
+  - Tutoring
+  tags_raw:
+  - Education
+  - Admissions
   - Roadmap
   - Tasks
   - Tutoring
